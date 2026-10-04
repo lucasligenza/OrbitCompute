@@ -218,8 +218,10 @@ table.metrics td:first-child { font-family: var(--font-sans); color: #c3cad4; }
 .tut-card p { margin: 0 0 8px; line-height: 1.5; color: #cdd5df; font-size: 12.5px; }
 .tut-card .tut-f { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
 
-@media (max-width: 1360px) {
+@media (max-width: 1720px) {
   .brand span { display: none; }
+}
+@media (max-width: 1500px) {
   .topbar .sched-badge { display: none; }
 }
 @media (max-width: 1180px) {

@@ -53,7 +53,9 @@ R☉ = 696 000 km, AU = 149 597 870.7 km, solar constant S₀ = 1361 W/m² (TSI 
 - Bus: if available power (generation + allowed battery discharge) < demand, **compute is shed
   first** (power-limited state), then the remainder is unmet (platform outage).
 - Battery: energy reservoir with charge/discharge power limits, efficiencies η_c, η_d,
-  SOC floor/ceiling. No voltage, temperature, ageing or rate-capacity effects.
+  SOC ceiling and two floors: at the **reserve** SOC compute is shed (non-essential load); essential
+  loads may continue down to the **emergency** floor, below which load is unmet (platform outage).
+  No voltage, temperature, ageing or rate-capacity effects.
 - Conservation identity checked every step:
   `E_gen_avail = E_load_served_from_gen + E_charge_in + E_curtailed` and
   `ΔE_batt = η_c·E_charge_in − E_discharge_out/η_d`.
@@ -71,6 +73,8 @@ Q_env = ε·A·F_E·q_OLR + α_s·A·k_sun·S·f_illum
 - Solar loading on the radiator defaults to zero (`k_sun = 0`, radiator assumed edge-on to Sun);
   user may set a fraction. **Albedo is not modelled.** No internal gradients, no MLI, no
   view-factor to the arrays, no two-phase loop dynamics.
+- Initial temperatures default to the steady state at a nominal half compute load (avoids an
+  artificial start-up transient); a fixed initial temperature can be configured.
 - States from T_e: NORMAL < T_warm ≤ WARM < T_throttle ≤ THROTTLED < T_limit ≤ THERMAL LIMIT.
   Throttle factor s falls linearly from 1 at T_throttle to s_min at T_limit; at T_limit compute
   stops (s = 0). Integration: explicit sub-steps sized below half the smallest time constant.
@@ -96,8 +100,11 @@ Q_env = ε·A·F_E·q_OLR + α_s·A·k_sun·S·f_illum
 - Visibility: elevation ≥ station minimum elevation (geometric, spherical-free ECEF/WGS84).
 - One active ground link per node (highest elevation). Rate = min(station rate, node terminal
   rate), constant during contact. **No RF link budget, weather or scheduling conflicts.**
-- Latency = slant range / c (+ ISL hop range / c). Optional ISL: relay through another node with
-  Earth-unobstructed line of sight (grazing altitude ≥ 100 km) and its own ground contact.
+- Latency = slant range / c (+ ISL hop range / c). Optional ISL: one hop to another node with
+  Earth-unobstructed line of sight (grazing altitude ≥ 100 km) that has a ground or relay link.
+- Optional **GEO data relays** (PRESET, illustrative): equatorial relays at fixed longitudes;
+  available when the line of sight clears Earth by 100 km; latency adds the GEO-to-ground hop.
+  Relay bandwidth sharing between nodes is not modelled.
 
 ## What this model cannot tell you
 Structural feasibility, launch mass/cost, radiation effects on hardware, attitude control,

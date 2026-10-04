@@ -2,6 +2,10 @@
 
 Each milestone is a commit that leaves `pytest` and the frontend build green.
 
+**Status (2026-10-04):** milestones 0–12 delivered. Backend milestones 3–6 landed as one engine
+commit and frontend milestones 7–11 as one visualization commit because the pieces are coupled
+(the step loop integrates power, thermal, compute and comms together).
+
 | # | Commit | Scope | Done when |
 |---|---|---|---|
 | 0 | `docs: define OrbitCompute architecture and scientific assumptions` | docs, skills, CLAUDE.md | committed |
@@ -19,5 +23,5 @@ Each milestone is a commit that leaves `pytest` and the frontend build green.
 | 12 | `test: validate OrbitCompute system behavior` | Playwright e2e, numeric suite | all green |
 
 ## Later (not v1)
-OR-Tools optimisation scheduler · Earth albedo · RF link budgets · drag/decay · per-station
+UI for live CelesTrak TLE fetch (`GET /api/tle/{catnr}` exists) · OR-Tools optimisation scheduler · Earth albedo · RF link budgets · drag/decay · per-station
 contention · multi-accelerator-class nodes · result streaming for long horizons.

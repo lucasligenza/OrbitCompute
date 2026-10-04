@@ -77,6 +77,11 @@ After the loop, `events.py` extracts timeline events from the recorded series.
 - **UI state**: mode, selected node/job, open panels, editor drafts (`uiStore`, `scenarioStore`).
   Panels subscribe to time through `useSimTime(hz)` which throttles to ~10 Hz.
 
+## Labels
+Screen-space labels are plain DOM nodes in `scene/LabelLayer.tsx`. 3D components write world
+positions into a registry each frame and `LabelProjector` (inside the Canvas) projects them and
+hides labels occluded by Earth. This avoids per-label React roots.
+
 ## Persistence
 
 SQLite file `backend/.data/orbitcompute.sqlite3` (git-ignored):

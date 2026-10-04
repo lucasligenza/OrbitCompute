@@ -5,7 +5,8 @@
 cd backend && uv run pytest -q                 # numerical + API tests
 cd frontend && npm run typecheck && npm run lint
 cd frontend && npm run test                    # unit (vitest)
-cd frontend && npm run e2e                     # Playwright (starts both servers)
+cd frontend && npm run e2e                     # Playwright on installed Edge (starts both servers)
+# PW_CHANNEL=chrome npm run e2e               # alternative browser channel
 ```
 
 ## Numerical invariants (must always hold)
@@ -26,7 +27,8 @@ cd frontend && npm run e2e                     # Playwright (starts both servers
 | Scheduler | identical scenario ⇒ identical result hash | exact |
 | Scheduler | allocated accelerators ≤ N every step | exact |
 | Comms | visible ⇔ elevation ≥ mask; zenith pass detected | — |
-| Timeline | sampleAt(t) after scrubbing backward equals fresh sampleAt(t) | exact |
+| Timeline | sampleAt(t) after scrubbing backward equals fresh sampleAt(t) (vitest + Playwright) | exact |
+| UI | 3D scene renders frames; no console errors on load | exact |
 
 ## Honesty rules (review checklist)
 - No preset is described as a real spacecraft or real product.

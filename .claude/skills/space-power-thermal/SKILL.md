@@ -12,7 +12,8 @@ power-flow or thermal visualizations, or any number shown in kW / kWh / °C.
 ## Domain rules
 - Eclipse comes from **geometry only** (conical shadow, fractional illumination). Never timers.
 - Bus priority: generation → loads → battery charge → curtailment. Deficit: battery discharge
-  (above SOC floor, under power limit) → shed compute → unmet (platform outage).
+  (compute only above the reserve SOC; essential loads down to the emergency floor) → shed compute
+  → unmet (platform outage).
 - Battery: `E += η_c·P_ch·Δt`, `E −= P_dis·Δt/η_d`; clamp to [E_min, E_max] by limiting power,
   never by clipping energy after the fact.
 - Thermal: two lumped nodes (equipment, radiator) + conductance G. All dissipated electrical

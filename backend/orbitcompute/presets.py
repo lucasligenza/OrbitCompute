@@ -171,7 +171,7 @@ SCENARIO_PRESETS: dict[str, dict[str, Any]] = {
                  compute={"host_overhead": 1.3},
                  solar={"area_m2": 105},
                  battery={"capacity_kwh": 25, "max_charge_kw": 15, "max_discharge_kw": 25},
-                 thermal={"radiator_area_m2": 60, "equipment_heat_capacity_kj_per_k": 1000,
+                 thermal={"radiator_area_m2": 40, "equipment_heat_capacity_kj_per_k": 1000,
                           "conductance_kw_per_k": 1.5, "heater_max_kw": 2.0},
                  platform={"avionics_kw": 1.5, "thermal_base_kw": 0.4},
                  comms={"isl_enabled": True, "isl_rate_gbps": 5.0, "relay_enabled": k == 0})
