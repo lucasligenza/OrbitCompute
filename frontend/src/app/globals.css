@@ -65,7 +65,7 @@ input, select, textarea { font: inherit; color: var(--text); }
 .panel-b > div > div:first-child { flex-wrap: wrap; }
 .explain { right: 12px; top: 12px; width: 330px; max-height: calc(100% - 24px); }
 .detail { left: 12px; top: 12px; width: 380px; max-height: calc(100% - 24px); }
-.legend { left: 12px; bottom: 12px; padding: 8px 10px; z-index: 15; }
+.legend { left: 50%; bottom: 12px; transform: translateX(-50%); padding: 8px 10px; z-index: 15; max-width: calc(100% - 760px); min-width: 260px; }
 .detail.collapsed, .explain.collapsed { width: auto; }
 
 .sec { padding: 8px 0; border-bottom: 1px solid var(--line); }
@@ -92,6 +92,12 @@ input, select, textarea { font: inherit; color: var(--text); }
 
 .status { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
 .status i { width: 8px; height: 8px; border-radius: 2px; display: inline-block; }
+
+/* ---------- scene controls ---------- */
+.scene-controls { position: absolute; left: 50%; top: 12px; transform: translateX(-50%); z-index: 15; display: flex; gap: 6px; align-items: center; padding: 6px; border-radius: 8px; background: var(--panel); border: 1px solid var(--line); backdrop-filter: blur(10px); font-size: 11px; }
+.seg { display: flex; border: 1px solid var(--line-2); border-radius: 5px; overflow: hidden; }
+.seg button { border: 0; background: transparent; color: var(--muted); padding: 3px 8px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; cursor: pointer; }
+.seg button.on { background: var(--accent-dim); color: var(--text); }
 
 /* ---------- scene labels ---------- */
 .label-layer { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 5; }
@@ -225,6 +231,7 @@ table.metrics td:first-child { font-family: var(--font-sans); color: #c3cad4; }
   .topbar .sched-badge { display: none; }
 }
 @media (max-width: 1180px) {
+  .legend { max-width: calc(100% - 660px); }
   .explain { width: 290px; }
   .detail { width: 320px; }
   .topbar .select { max-width: 190px; }

@@ -28,7 +28,7 @@ export default function Legend() {
       <div style={{ display: "flex", gap: 10, marginTop: 6, fontSize: 11 }} className="muted">
         <label><input type="checkbox" checked={showGrid} onChange={(e) => setUi({ showGrid: e.target.checked })} /> lat/lon grid</label>
         <label><input type="checkbox" checked={showTracks} onChange={(e) => setUi({ showGroundTracks: e.target.checked })} /> ground tracks</label>
-        <span className="faint">spacecraft glyphs not to scale</span>
+        <span className="faint">spacecraft not to scale · city lights &amp; clouds illustrative</span>
       </div>
     </div>
   );

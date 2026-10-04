@@ -9,6 +9,7 @@ import TimeControls from "./TimeControls";
 import WhatsHappening from "./WhatsHappening";
 import DetailPanel from "./DetailPanel";
 import Legend from "./Legend";
+import SceneControls from "./SceneControls";
 import DesignDrawer from "@/editor/DesignDrawer";
 import CompareView from "@/compare/CompareView";
 import Tutorial, { maybeStartTutorial } from "@/tutorial/Tutorial";
@@ -52,6 +53,7 @@ export default function App() {
             <DetailPanel />
             <WhatsHappening />
             <Legend />
+            <SceneControls />
           </>
         )}
         {status === "running" && (

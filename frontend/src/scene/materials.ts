@@ -1,55 +1,47 @@
 import * as THREE from "three";
+import { LineMaterial } from "three/examples/jsm/lines/LineMaterial.js";
 
-/** Line whose opacity fades with |t_vertex - now|: bright trail behind, dim path ahead. */
-export function timeFadeLineMaterial(color: string, pastS: number, futureS: number, futureAlpha = 0.35) {
-  return new THREE.ShaderMaterial({
+/**
+ * Screen-space fat line (Line2) whose alpha fades with |t_segment − now|: bright trail behind the
+ * spacecraft, dim path ahead. Requires per-instance attributes `instanceTStart`/`instanceTEnd`
+ * (seconds) on the LineGeometry. Patched into three's LineMaterial shader.
+ */
+export function timeFadeFatLine(color: string, widthPx: number, pastS: number, futureS: number, futureAlpha = 0.3) {
+  const uniforms = {
+    uNow: { value: 0 },
+    uPast: { value: pastS },
+    uFuture: { value: futureS },
+    uFutureAlpha: { value: futureAlpha },
+  };
+  const m = new LineMaterial({
+    color: new THREE.Color(color).getHex(),
+    linewidth: widthPx,
     transparent: true,
     depthWrite: false,
-    uniforms: {
-      uNow: { value: 0 },
-      uPast: { value: pastS },
-      uFuture: { value: futureS },
-      uFutureAlpha: { value: futureAlpha },
-      uColor: { value: new THREE.Color(color) },
-      uOpacity: { value: 1 },
-    },
-    vertexShader: /* glsl */ `
-      attribute float aTime;
-      uniform float uNow; uniform float uPast; uniform float uFuture; uniform float uFutureAlpha;
-      varying float vAlpha;
-      void main() {
-        float d = aTime - uNow;
-        float a = d < 0.0 ? (1.0 + d / uPast) * 0.95 : (1.0 - d / uFuture) * uFutureAlpha;
-        vAlpha = clamp(a, 0.0, 1.0);
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-      }`,
-    fragmentShader: /* glsl */ `
-      uniform vec3 uColor; uniform float uOpacity; varying float vAlpha;
-      void main() { if (vAlpha <= 0.002) discard; gl_FragColor = vec4(uColor, vAlpha * uOpacity); }`,
+    blending: THREE.AdditiveBlending,
+    worldUnits: false,
   });
-}
-
-/** Two-point link line with animated dashes flowing from start (a=0) to end (a=1). */
-export function flowLineMaterial(color: string) {
-  return new THREE.ShaderMaterial({
-    transparent: true,
-    depthWrite: false,
-    uniforms: {
-      uTime: { value: 0 },
-      uLen: { value: 1 },
-      uColor: { value: new THREE.Color(color) },
-      uOpacity: { value: 0.85 },
-    },
-    vertexShader: /* glsl */ `
-      attribute float aT; varying float vT;
-      void main() { vT = aT; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
-    fragmentShader: /* glsl */ `
-      uniform float uTime; uniform float uLen; uniform vec3 uColor; uniform float uOpacity; varying float vT;
-      void main() {
-        float s = vT * uLen - uTime * 2.5;
-        float dash = step(0.45, fract(s / 0.6));
-        float a = mix(0.25, 1.0, dash) * uOpacity;
-        gl_FragColor = vec4(uColor, a);
-      }`,
-  });
+  m.onBeforeCompile = (shader) => {
+    Object.assign(shader.uniforms, uniforms);
+    shader.vertexShader = shader.vertexShader.replace(
+      "void main() {",
+      "attribute float instanceTStart;\nattribute float instanceTEnd;\nvarying float vT;\nvoid main() {\n  vT = ( position.y < 0.5 ) ? instanceTStart : instanceTEnd;",
+    );
+    shader.fragmentShader = shader.fragmentShader
+      .replace(
+        "void main() {",
+        "uniform float uNow; uniform float uPast; uniform float uFuture; uniform float uFutureAlpha;\nvarying float vT;\nvoid main() {",
+      )
+      .replace(
+        "gl_FragColor = vec4( diffuseColor.rgb, alpha );",
+        `float d = vT - uNow;
+         float fade = d < 0.0 ? (1.0 + d / uPast) : (1.0 - d / uFuture) * uFutureAlpha;
+         fade = clamp(fade, 0.0, 1.0);
+         fade = fade * fade * (3.0 - 2.0 * fade);
+         if (fade < 0.003) discard;
+         gl_FragColor = vec4( diffuseColor.rgb, alpha * fade );`,
+      );
+  };
+  m.customProgramCacheKey = () => "timeFadeFatLine";
+  return { material: m, uniforms };
 }

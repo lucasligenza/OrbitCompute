@@ -6,7 +6,10 @@ async function open(page: Page) {
   errors.length = 0;
   page.on("pageerror", (e) => errors.push(String(e)));
   page.on("console", (m) => { if (m.type() === "error") errors.push(m.text()); });
-  await page.addInitScript(() => localStorage.setItem("orbitcompute.tutorial.seen", "1"));
+  await page.addInitScript(() => {
+    localStorage.setItem("orbitcompute.tutorial.seen", "1");
+    localStorage.setItem("orbitcompute.quality", "low"); // SwiftShader: keep headless runs fast
+  });
   await page.goto("/");
   await expect(page.getByTestId("scene")).toHaveAttribute("data-ready", "1");
   await expect(page.getByTestId("explain-panel")).toBeVisible();

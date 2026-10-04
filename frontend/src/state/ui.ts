@@ -12,6 +12,18 @@ export const MODES: { key: Mode; label: string; hint: string }[] = [
 ];
 
 export type Overlay = null | "design" | "compare";
+export type Quality = "high" | "low";
+
+const QKEY = "orbitcompute.quality";
+function initialQuality(): Quality {
+  try {
+    const v = localStorage.getItem(QKEY);
+    if (v === "high" || v === "low") return v;
+  } catch {
+    /* storage unavailable */
+  }
+  return "high";
+}
 
 interface UiState {
   mode: Mode;
@@ -25,6 +37,12 @@ interface UiState {
   showGrid: boolean;
   showGroundTracks: boolean;
   preview: { nodeIndex: number; data: OrbitPreview } | null;
+  quality: Quality;
+  showClouds: boolean;
+  follow: boolean;
+  /** incremented to request a camera reset / fly-to */
+  cameraNonce: number;
+  setQuality: (q: Quality) => void;
   setMode: (m: Mode) => void;
   selectNode: (i: number) => void;
   selectJob: (j: number | null) => void;
@@ -43,6 +61,14 @@ export const useUi = create<UiState>((set) => ({
   showGrid: true,
   showGroundTracks: true,
   preview: null,
+  quality: typeof window === "undefined" ? "high" : initialQuality(),
+  showClouds: true,
+  follow: false,
+  cameraNonce: 0,
+  setQuality: (quality) => {
+    try { localStorage.setItem(QKEY, quality); } catch { /* ignore */ }
+    set({ quality });
+  },
   setMode: (mode) => set({ mode }),
   selectNode: (selectedNode) => set({ selectedNode, selectedJob: null }),
   selectJob: (selectedJob) => set({ selectedJob }),
