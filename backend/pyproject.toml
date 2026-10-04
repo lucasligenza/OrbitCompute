@@ -1,0 +1,29 @@
+[project]
+name = "orbitcompute"
+version = "0.1.0"
+description = "Deterministic simulation engine for orbital AI compute infrastructure"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn>=0.30",
+    "numpy>=1.26",
+    "sgp4>=2.23",
+    "pydantic>=2.7",
+]
+
+[dependency-groups]
+dev = ["pytest>=8", "httpx>=0.27", "ruff>=0.6"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["orbitcompute"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.ruff]
+line-length = 110

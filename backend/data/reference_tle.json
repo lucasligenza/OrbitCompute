@@ -1,0 +1,10 @@
+{
+  "name": "ISS (ZARYA)",
+  "norad_id": 25544,
+  "line1": "1 25544U 98067A   26276.82055412  .00004062  00000+0  82609-4 0  9990",
+  "line2": "2 25544  51.6315 122.4760 0006936 219.0621 140.9867 15.48726504588592",
+  "epoch_utc": "2026-10-03T19:41:35.876Z",
+  "source": "CelesTrak GP API, https://celestrak.org/NORAD/elements/gp.php?CATNR=25544&FORMAT=TLE",
+  "retrieved_utc": "2026-10-04",
+  "provenance": "REAL"
+}
