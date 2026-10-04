@@ -1,0 +1,50 @@
+import { create } from "zustand";
+import type { OrbitPreview } from "@/sim/types";
+
+export type Mode = "orbit" | "power" | "thermal" | "compute" | "network" | "system";
+export const MODES: { key: Mode; label: string; hint: string }[] = [
+  { key: "orbit", label: "Orbit", hint: "Spacecraft, orbit tracks, ground tracks" },
+  { key: "power", label: "Power", hint: "Solar generation, battery, eclipse" },
+  { key: "thermal", label: "Thermal", hint: "Temperatures, radiators, throttling" },
+  { key: "compute", label: "Compute", hint: "Utilization, jobs, queues" },
+  { key: "network", label: "Network", hint: "Links, contact windows, data transfer" },
+  { key: "system", label: "System", hint: "Combined mission state" },
+];
+
+export type Overlay = null | "design" | "compare";
+
+interface UiState {
+  mode: Mode;
+  selectedNode: number;
+  selectedJob: number | null;
+  detailOpen: boolean;
+  explainOpen: boolean;
+  eventsOpen: boolean;
+  overlay: Overlay;
+  tutorialStep: number | null;
+  showGrid: boolean;
+  showGroundTracks: boolean;
+  preview: { nodeIndex: number; data: OrbitPreview } | null;
+  setMode: (m: Mode) => void;
+  selectNode: (i: number) => void;
+  selectJob: (j: number | null) => void;
+  set: (p: Partial<UiState>) => void;
+}
+
+export const useUi = create<UiState>((set) => ({
+  mode: "orbit",
+  selectedNode: 0,
+  selectedJob: null,
+  detailOpen: true,
+  explainOpen: true,
+  eventsOpen: false,
+  overlay: null,
+  tutorialStep: null,
+  showGrid: true,
+  showGroundTracks: true,
+  preview: null,
+  setMode: (mode) => set({ mode }),
+  selectNode: (selectedNode) => set({ selectedNode, selectedJob: null }),
+  selectJob: (selectedJob) => set({ selectedJob }),
+  set: (p) => set(p),
+}));

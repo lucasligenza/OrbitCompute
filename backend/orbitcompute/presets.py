@@ -121,7 +121,7 @@ SCENARIO_PRESETS: dict[str, dict[str, Any]] = {
                        compute={"host_overhead": 1.3},
                        solar={"area_m2": 300},
                        battery={"capacity_kwh": 60, "max_charge_kw": 40, "max_discharge_kw": 70},
-                       thermal={"radiator_area_m2": 150},
+                       thermal={"radiator_area_m2": 110},
                        comms={"relay_enabled": True, "relay_rate_gbps": 1.2})],
         "ground_stations": stations(*ALL_STATIONS),
         "workload": {"seed": 7, "intensity": 0.8,
