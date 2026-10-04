@@ -87,6 +87,7 @@ After the loop, `events.py` extracts timeline events from the recorded series.
 | `Tracks.tsx` | time-faded fat orbit trails / ground tracks, nadir + footprint |
 | `Network3D.tsx` | stations, visibility cones, GEO relays, link beams + packets |
 | `EclipseVolume.tsx` | conical umbra/penumbra display aid |
+| `DataFlow.tsx`, `userRoutes.ts` | user data packets: city arcs (illustrative) → endpoint → relay/ISL → node; intensities from simulated link use |
 | `CameraRig.tsx`, `Effects.tsx` | follow/reset/intro camera; bloom/SMAA/vignette (High quality) |
 
 Graphics quality (High/Low) and panel detail (Simple/Advanced) are per-viewer preferences in

@@ -49,7 +49,8 @@ export function encodeNode(mode: Mode, s: NodeSample, cfg: NodeConfig): Encoding
     }
     case "network": {
       const color = s.link === "NONE" ? C.dim : s.link === "DIRECT" ? C.ok : s.link === "RELAY" ? "#a78bfa" : C.accent;
-      const label = s.link === "NONE" ? "no link" : s.link === "DIRECT" ? `ground ${s.linkDown.toFixed(1)} Gbps` : s.link === "RELAY" ? "GEO relay" : "ISL relay";
+      const waiting = s.nStalled > 0 ? ` · ${s.nStalled} session${s.nStalled === 1 ? "" : "s"} waiting` : s.upBacklog > 0.01 ? " · uploads queued" : "";
+      const label = s.link === "NONE" ? `no link${waiting}` : s.link === "DIRECT" ? `ground ${s.linkDown.toFixed(1)} Gbps` : s.link === "RELAY" ? "GEO relay" : "ISL relay";
       return { color, label, status: s.link };
     }
     case "system": {
@@ -91,6 +92,9 @@ export function legendFor(mode: Mode): { title: string; items: LegendItem[] } {
         { color: C.ok, label: "Ground link", shape: "dash" }, { color: C.accent, label: "Inter-satellite", shape: "dash" },
         { color: "#a78bfa", label: "GEO relay", shape: "dash" }, { color: C.dim, label: "No link" },
         { color: "rgba(77,163,255,0.5)", label: "Station visibility circle", shape: "line" },
+        { color: "#5ec8ff", label: "User requests ↑" }, { color: "#3ecf8e", label: "Results to users ↓" },
+        { color: "#f5a524", label: "Users waiting (no link)" },
+        { color: "#ffe2b0", label: "User cities & backhaul: illustrative", shape: "line" },
       ] };
     case "system":
       return { title: "Mission state", items: [

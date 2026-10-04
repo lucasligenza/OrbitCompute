@@ -15,6 +15,7 @@ import { Spacecraft } from "./SpacecraftModel";
 import { GroundTracks, NadirFootprint, OrbitTrails } from "./Tracks";
 import { Links, Relays, Stations } from "./Network3D";
 import { EclipseVolume } from "./EclipseVolume";
+import { DataPackets, UserArcs } from "./DataFlow";
 import CameraRig from "./CameraRig";
 import Effects from "./Effects";
 import { LabelProjector, labelEntry } from "./labels";
@@ -55,6 +56,7 @@ function EarthSystem({ res, mode }: { res: PreparedResult; mode: Mode }) {
         <GroundTracks res={res} />
         <Stations res={res} mode={mode} />
         <Relays res={res} />
+        <UserArcs res={res} mode={mode} />
       </group>
       <Atmosphere material={mats.atmo} />
     </>
@@ -121,6 +123,7 @@ function SceneContent() {
       {res.nodes.map((nd) => <Spacecraft key={`${res.hash}-${nd.index}`} res={res} nd={nd} mode={mode} />)}
       <NadirFootprint res={res} />
       <Links res={res} mode={mode} />
+      <DataPackets res={res} mode={mode} />
       <PreviewOrbit />
     </>
   );

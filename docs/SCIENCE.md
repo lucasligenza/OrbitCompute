@@ -106,6 +106,14 @@ Q_env = ε·A·F_E·q_OLR + α_s·A·k_sun·S·f_illum
   available when the line of sight clears Earth by 100 km; latency adds the GEO-to-ground hop.
   Relay bandwidth sharing between nodes is not modelled.
 
+## Visualisation-only elements (not modelled)
+- **User data flow** (Network mode): which cities send requests and the terrestrial backhaul
+  arcs to the ground endpoint are illustrative. What is simulated: the endpoint in use (station,
+  GEO-relay ground terminal assumed at the sub-relay point, or via an ISL neighbour), whether any
+  link exists, uplink/downlink volumes per step and realtime inference sessions served or stalled.
+  Packet density is a display mapping of those quantities, not a packet-level network simulation.
+- City night lights and clouds are decorative.
+
 ## What this model cannot tell you
 Structural feasibility, launch mass/cost, radiation effects on hardware, attitude control,
 debris risk, precise pass timing, RF spectrum availability, or real hardware performance.

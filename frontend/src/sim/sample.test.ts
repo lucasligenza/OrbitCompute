@@ -23,6 +23,7 @@ function fakeResult(): PreparedResult {
     n_queued: arr(() => 1), n_uplink: arr(() => 0), n_downlink: arr(() => 0), link_type: [1, 1, 0, 0, 3], link_station: [0, 0, -1, -1, -1],
     link_relay: arr(() => -1), link_geo: [-1, -1, -1, -1, 0], link_down_gbps: [2, 2, 0, 0, 1.2], link_up_gbps: [0.5, 0.5, 0, 0, 1.2],
     range_km: [900, 900, 0, 0, 72000], latency_ms: [3, 3, 0, 0, 240], uplink_backlog_gbit: arr(() => 0), downlink_backlog_gbit: arr(() => 0),
+    uplinked_gbit: [5, 5, 0, 0, 10], downlinked_gbit: [20, 20, 0, 0, 10],
   };
   const node = { battery: { min_soc: 0.2 }, thermal: { throttle_c: 75, min_operating_c: 0, warm_c: 60, limit_c: 90 }, compute: { accelerator_count: 8 } };
   const raw = {
@@ -31,8 +32,8 @@ function fakeResult(): PreparedResult {
     time: { epoch_utc: "2026-10-04T00:00:00Z", step_s: dt, n, duration_s: n * dt },
     sun: { x: arr(() => 1), y: arr(() => 0), z: arr(() => 0), dist_km: arr(() => 1.5e8) },
     gmst_rad: [6.2, 6.25, 6.28, 0.02, 0.05],
-    stations: [{ name: "Test Station" }], relays: [{ name: "Relay A" }],
-    nodes: [{ id: "N", name: "N", index: 0, orbit: { period_s: 5700 }, derived: {}, series, alloc: [], eclipse_windows: [[75, 150]],
+    stations: [{ name: "Test Station", lat_deg: 37.94, lon_deg: -75.46 }], relays: [{ name: "Relay A", lon_deg: -41 }],
+    nodes: [{ id: "N", name: "N", index: 0, orbit: { period_s: 5700 }, derived: {}, series, alloc: [[], [], [], [], []], eclipse_windows: [[75, 150]],
       contact_windows: [[0, 0, 60, 40]], metrics: {} }],
     jobs: [], metrics: {}, checks: {}, provenance: {},
     events: [{ t: 75, node: 0, type: "eclipse_enter", category: "orbit", severity: "info", label: "N entered eclipse", detail: "" }],
@@ -200,5 +201,40 @@ describe("mission feed", async () => {
     const f = buildFeed(res);
     expect(nowIndex(f, -1)).toBe(-1);
     expect(f[nowIndex(f, 80)].t).toBeLessThanOrEqual(80);
+  });
+});
+
+describe("user data routes", async () => {
+  const { routeFor, flowFor, citiesNear, arcLocal, ARC_PTS } = await import("../scene/userRoutes");
+  const res = fakeResult();
+  it("direct link routes users through the linked station", () => {
+    const r = routeFor(res, 0, 0, 0);
+    expect(r.linkType).toBe(1);
+    expect(r.endpoint?.key).toBe("st0");
+    expect(flowFor(res, 0, 0).up).toBeGreaterThan(0);
+  });
+  it("no link keeps users pointed at the home station and reports waiting", () => {
+    const r = routeFor(res, 0, 2, 75);
+    expect(r.linkType).toBe(0);
+    expect(r.endpoint?.key).toBe("st0"); // most recent contact
+    expect(r.nextContactIn).toBe(Infinity);
+    const f = flowFor(res, 0, 2);
+    expect(f.up).toBe(0);
+    expect(f.down).toBe(0);
+    expect(f.waiting).toBeGreaterThan(0); // queued jobs on board
+  });
+  it("GEO relay routes through the relay ground terminal", () => {
+    const r = routeFor(res, 0, 4, 130);
+    expect(r.linkType).toBe(3);
+    expect(r.endpoint?.kind).toBe("relay-ground");
+  });
+  it("picks six nearby cities and builds lifted arcs that end at the endpoint", () => {
+    const ep = { key: "test-ep", lat: 37.94, lon: -75.46, label: "Wallops", kind: "station" as const };
+    const cities = citiesNear(ep);
+    expect(cities).toHaveLength(6);
+    const arc = arcLocal(cities[0], ep, 6.378);
+    expect(arc.length).toBe(ARC_PTS * 3);
+    const mid = Math.hypot(arc[(ARC_PTS >> 1) * 3], arc[(ARC_PTS >> 1) * 3 + 1], arc[(ARC_PTS >> 1) * 3 + 2]);
+    expect(mid).toBeGreaterThan(6.378 * 1.004); // lifted above the surface
   });
 });

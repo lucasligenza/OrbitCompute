@@ -1,6 +1,6 @@
 "use client";
 import { useFrame, useThree } from "@react-three/fiber";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo } from "react";
 import * as THREE from "three";
 import { Line2 } from "three/examples/jsm/lines/Line2.js";
 import { LineGeometry } from "three/examples/jsm/lines/LineGeometry.js";
@@ -114,35 +114,24 @@ export function Relays({ res }: { res: PreparedResult }) {
   );
 }
 
-const PACKETS = 4;
-
-/** Communication links: fat glowing beams with travelling data packets (downlink direction). */
+/** Communication links: fat glowing beams (data packets are drawn by DataFlow). */
 export function Links({ res, mode }: { res: PreparedResult; mode: Mode }) {
   const scene = useThree((s) => s.scene);
-  const packetTex = useMemo(() => glowTexture([[0, "rgba(255,255,255,1)"], [0.35, "rgba(255,255,255,0.4)"], [1, "rgba(255,255,255,0)"]], 64), []);
   const links = useMemo(() => res.nodes.map(() => {
     const g = new LineGeometry();
     g.setPositions([0, 0, 0, 0, 0, 1]);
     const m = new LineMaterial({ color: 0xffffff, linewidth: 2, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.6 });
     const line = new Line2(g, m);
     line.frustumCulled = false;
-    const packets = Array.from({ length: PACKETS }, () => {
-      const sm = new THREE.SpriteMaterial({ map: packetTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false });
-      const sp = new THREE.Sprite(sm);
-      sp.scale.setScalar(0.18);
-      return sp;
-    });
     const group = new THREE.Group();
-    group.add(line, ...packets);
-    return { g, m, line, packets, group };
-  }), [res, packetTex]);
-  useEffect(() => () => links.forEach((l) => { l.g.dispose(); l.m.dispose(); l.packets.forEach((p) => p.material.dispose()); }), [links]);
+    group.add(line);
+    return { g, m, line, group };
+  }), [res]);
+  useEffect(() => () => links.forEach((l) => { l.g.dispose(); l.m.dispose(); }), [links]);
   const target = useMemo(() => new THREE.Vector3(), []);
   const posBuf = useMemo(() => new Float32Array(6), []);
   const col = useMemo(() => new THREE.Color(), []);
-  const phase = useRef(0);
-  useFrame((state, delta) => {
-    phase.current += delta;
+  useFrame(() => {
     const t = timeStore.getState().t;
     const earth = scene.getObjectByName("earth-fixed");
     const c = cursorAt(res, t);
@@ -175,17 +164,7 @@ export function Links({ res, mode }: { res: PreparedResult; mode: Mode }) {
       col.set(LINK_COLORS[type]);
       l.m.color.copy(col);
       l.m.linewidth = mode === "network" ? 2.4 : 1.4;
-      l.m.opacity = mode === "network" ? 0.75 : 0.4;
-      const rate = nd.s.link_down_gbps[c.i];
-      const speed = 0.25 + 0.45 * Math.min(rate / 5, 1); // cycles per second (display only)
-      l.packets.forEach((p, k) => {
-        const f = (phase.current * speed + k / PACKETS) % 1;
-        p.position.lerpVectors(from, target, f);
-        p.material.color.copy(col).multiplyScalar(1.8);
-        p.material.opacity = Math.sin(Math.PI * f);
-        const s = mode === "network" ? 0.2 : 0.13;
-        p.scale.setScalar(s * (from.distanceTo(target) > 20 ? 2.5 : 1));
-      });
+      l.m.opacity = mode === "network" ? 0.55 : 0.32;
     });
   });
   return <>{links.map((l, i) => <primitive key={i} object={l.group} />)}</>;

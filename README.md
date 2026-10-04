@@ -20,6 +20,10 @@ replayed from a deterministic physics-based engine.
 | **Compute** (racks, jobs) | **Follow-cam close-up** |
 | ![Compute mode](docs/images/compute-mode.png) | ![Follow close-up](docs/images/follow-closeup.png) |
 
+**People on Earth:** requests (cyan) flow from nearby cities through Wallops up to the spacecraft; results (green) flow back down.
+
+![User data flow](docs/images/user-dataflow.png)
+
 ## Quick start
 ```bash
 # backend (Python 3.11+, uv)
@@ -43,6 +47,11 @@ cd frontend && npm install && npm run dev
 - **Now** — a deterministic explanation of the selected node at every instant, including *why*
   (e.g. "In Earth's shadow the battery alone cannot cover the requested compute load, so compute is
   shed to protect the reserve").
+- **People on Earth** — data packets travel from nearby cities to the ground station (or GEO-relay
+  terminal / ISL neighbour) and up to the spacecraft as requests (cyan), and back down as results
+  (green). With no link, requests pile up at the station in amber and the label shows how many
+  sessions are waiting and when the next contact comes. Packet density follows the simulated
+  link use and realtime sessions; city locations and terrestrial backhaul are illustrative.
 - **Mission feed** — one chronological, plain-language feed of everything that happens across all
   spacecraft (eclipses, power shortages, overheating, link changes, summarised job completions,
   deadline misses), each with what it means, a "Coming up" preview, and click-to-jump.

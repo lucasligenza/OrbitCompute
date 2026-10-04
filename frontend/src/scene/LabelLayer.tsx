@@ -4,7 +4,10 @@ import { useSimTime } from "@/state/time";
 import { useUi } from "@/state/ui";
 import { cursorAt, sampleNode } from "@/sim/sample";
 import { EARTH_R, ecefToLocal, latLonToLocal } from "@/sim/frames";
+import { fmtDur } from "@/sim/format";
 import { encodeNode } from "./encoding";
+import { dataFlowVisible } from "./DataFlow";
+import { flowFor, routeFor } from "./userRoutes";
 import { bindLabel } from "./labels";
 
 function local(fn: (out: [number, number, number]) => void): [number, number, number] {
@@ -26,6 +29,16 @@ export default function LabelLayer() {
   const sel = res.nodes[Math.min(selected, res.nodes.length - 1)];
   const activeStation = sel.s.link_type[c.i] === 1 ? sel.s.link_station[c.i] : -1;
   const showRelays = res.raw.scenario.nodes.some((n) => n.comms.relay_enabled);
+  // What the selected node means for people on the ground right now
+  const route = routeFor(res, sel.index, c.i, t);
+  const flow = flowFor(res, sel.index, c.i);
+  const ep = route.endpoint;
+  const userLabel = !ep || !dataFlowVisible(mode) ? null
+    : route.linkType > 0
+      ? (flow.live > 0 ? `serving users · ${flow.live} live session${flow.live === 1 ? "" : "s"}` : "users connected · data flowing")
+      : flow.waiting > 0
+        ? `users waiting${flow.stalled > 0 ? ` · ${flow.stalled} session${flow.stalled === 1 ? "" : "s"} stalled` : ""} · next contact ${isFinite(route.nextContactIn) ? `in ${fmtDur(route.nextContactIn)}` : "not in horizon"}`
+        : null;
   return (
     <div className="label-layer" aria-hidden>
       {res.nodes.map((nd) => {
@@ -58,6 +71,14 @@ export default function LabelLayer() {
           </div>
         );
       })}
+      {userLabel && ep && (
+        <div key={`${res.hash}-ep-${ep.key}-${route.linkType > 0}`} className="lbl-anchor"
+          ref={bindLabel(`ep-${res.hash}-${ep.key}`, local((p) => latLonToLocal(ep.lat, ep.lon, EARTH_R * 1.004, p)))}>
+          <div className={`user-label${route.linkType > 0 ? "" : " waiting"}`} data-testid="user-label">
+            <span className="ul-dot" />{sel.name}: {userLabel}
+          </div>
+        </div>
+      )}
       {overlay === "design" && preview && (
         <div className="lbl-anchor" ref={bindLabel("preview")}>
           <div className="preview-label">PREVIEW orbit</div>

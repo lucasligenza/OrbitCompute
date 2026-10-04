@@ -383,3 +383,11 @@ table.metrics td:first-child { font-family: var(--font-sans); color: #c3cad4; }
 .hud .panel.tall { height: 100%; }
 .tab { display: inline-flex; align-items: center; gap: 5px; }
 @media (max-width: 1180px) { .tab-l { display: none; } .tab { padding: 5px 8px; } }
+
+/* users-on-Earth label at the ground endpoint */
+.lbl-anchor > .user-label { transform: translate(-50%, 14px); }
+.user-label { display: flex; align-items: center; gap: 6px; padding: 2px 8px; border-radius: 10px; font-size: 10.5px; white-space: nowrap; color: #bfe9ff; background: rgba(6, 18, 28, 0.82); border: 1px solid rgba(94, 200, 255, 0.45); box-shadow: 0 0 12px rgba(94, 200, 255, 0.15); }
+.user-label .ul-dot { width: 6px; height: 6px; border-radius: 50%; background: #5ec8ff; box-shadow: 0 0 6px #5ec8ff; }
+.user-label.waiting { color: #ffd9a0; border-color: rgba(245, 165, 36, 0.55); box-shadow: 0 0 12px rgba(245, 165, 36, 0.18); }
+.user-label.waiting .ul-dot { background: #f5a524; box-shadow: 0 0 6px #f5a524; animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: 0.35; } }
