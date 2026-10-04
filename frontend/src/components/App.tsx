@@ -49,12 +49,14 @@ export default function App() {
       <div className="stage">
         <OrbitScene />
         {hasResult && (
-          <>
-            <DetailPanel />
-            <WhatsHappening />
-            <Legend />
-            <SceneControls />
-          </>
+          <div className="hud">
+            <div className="hud-left"><DetailPanel /></div>
+            <div className="hud-center">
+              <SceneControls />
+              <Legend />
+            </div>
+            <div className="hud-right"><WhatsHappening /></div>
+          </div>
         )}
         {status === "running" && (
           <div className="banner" role="status"><span className="spinner" /> &nbsp;Running deterministic simulation…</div>

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { cursorAt, hold, jobPhaseAt, jobProgressAt, lerp, lerpAngle, positionEci, sampleNode } from "./sample";
-import { eciToRender, latLonToLocal } from "./frames";
+import { eciToRender, latLonToLocal, lookAngles } from "./frames";
 import { explain } from "./explain";
 import { prepare, type PreparedResult } from "./result";
 import { fmtDur, fmtKw } from "./format";
@@ -135,5 +135,70 @@ describe("format", () => {
     expect(fmtKw(12.34)).toBe("12.3 kW");
     expect(fmtDur(3725)).toBe("1:02:05");
     expect(fmtDur(65)).toBe("01:05");
+  });
+});
+
+describe("lookAngles", () => {
+  // WGS84 geodetic -> ECEF (same formula as the backend)
+  const ecef = (lat: number, lon: number, hKm: number): [number, number, number] => {
+    const a = 6378.137, e2 = 0.00669437999014, la = (lat * Math.PI) / 180, lo = (lon * Math.PI) / 180;
+    const N = a / Math.sqrt(1 - e2 * Math.sin(la) ** 2);
+    return [(N + hKm) * Math.cos(la) * Math.cos(lo), (N + hKm) * Math.cos(la) * Math.sin(lo), (N * (1 - e2) + hKm) * Math.sin(la)];
+  };
+  it("zenith pass gives 90 deg elevation and altitude range", () => {
+    const st = ecef(37.94, -75.46, 0.01);
+    const sat = ecef(37.94, -75.46, 550.01); // with gmst = 0, ECI == ECEF
+    const r = lookAngles(sat, 0, st, 37.94, -75.46);
+    expect(r.el).toBeCloseTo(90, 3);
+    expect(r.range).toBeCloseTo(550, 3);
+  });
+  it("satellite due north at the horizon side has azimuth ~0 and low elevation", () => {
+    const st = ecef(0, 0, 0);
+    const sat = ecef(15, 0, 550);
+    const r = lookAngles(sat, 0, st, 0, 0);
+    expect(r.az).toBeCloseTo(0, 6);
+    expect(r.el).toBeGreaterThan(0);
+    expect(r.el).toBeLessThan(30);
+  });
+  it("matches backend elevation for a sample geometry (ground.py look_angles)", () => {
+    // Backend reference (uv run python: ground.look_angles): station (37.94, -75.46, 10 m),
+    // satellite ECEF (1200, -5200, 4300) km -> el 67.904 deg, range 519.106 km
+    const st = ecef(37.94, -75.46, 0.01);
+    const r = lookAngles([1200, -5200, 4300], 0, st, 37.94, -75.46);
+    expect(r.el).toBeCloseTo(67.904, 2);
+    expect(r.range).toBeCloseTo(519.106, 2);
+  });
+  it("rotation by GMST matches pre-rotated ECEF", () => {
+    const st = ecef(10, 20, 0);
+    const satEcef = ecef(12, 21, 550);
+    const g = 1.234;
+    const eci: [number, number, number] = [Math.cos(g) * satEcef[0] - Math.sin(g) * satEcef[1], Math.sin(g) * satEcef[0] + Math.cos(g) * satEcef[1], satEcef[2]];
+    const a = lookAngles(eci, g, st, 10, 20), b = lookAngles(satEcef, 0, st, 10, 20);
+    expect(a.el).toBeCloseTo(b.el, 9);
+    expect(a.az).toBeCloseTo(b.az, 9);
+  });
+});
+
+describe("mission feed", async () => {
+  const { buildFeed, nowIndex } = await import("./feed");
+  const res = fakeResult();
+  it("starts and ends with mission items, is sorted, and explains events in plain language", () => {
+    const f = buildFeed(res);
+    expect(f[0].title).toBe("Simulation starts");
+    expect(f[f.length - 1].title).toBe("End of simulated horizon");
+    for (let i = 1; i < f.length; i++) expect(f[i].t).toBeGreaterThanOrEqual(f[i - 1].t);
+    const ecl = f.find((x) => x.title === "Entered Earth's shadow")!;
+    expect(ecl.key).toBe(true);
+    expect(ecl.meaning).toMatch(/battery/);
+  });
+  it("derives link changes from recorded link state", () => {
+    const f = buildFeed(res);
+    expect(f.some((x) => x.title === "No communication link" && x.t === 60)).toBe(true);
+    expect(f.some((x) => x.title.startsWith("Link up via") && x.t === 120)).toBe(true);
+  });
+  it("nowIndex is a binary search over time", () => {
+    const f = buildFeed(res);
+    expect(nowIndex(f, -1)).toBe(-1);
+    expect(f[nowIndex(f, 80)].t).toBeLessThanOrEqual(80);
   });
 });

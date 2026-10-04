@@ -4,7 +4,6 @@ import { useScenario } from "@/state/scenario";
 import { SPEEDS, timeStore, useSimTime, useTimeState } from "@/state/time";
 import { useUi } from "@/state/ui";
 import { fmtMet } from "@/sim/format";
-import EventTimeline from "./EventTimeline";
 
 const MAJOR = new Set(["soc_reserve", "outage_start", "thermal_limit", "throttle_start", "power_short_start", "deadline_miss"]);
 const SEV_COLOR: Record<string, string> = { critical: "var(--bad)", warning: "var(--warn)", nominal: "var(--ok)", info: "var(--accent)" };
@@ -78,7 +77,7 @@ export default function TimeControls() {
   const playing = useTimeState((s) => s.playing);
   const speed = useTimeState((s) => s.speed);
   const t = useSimTime(10);
-  const eventsOpen = useUi((s) => s.eventsOpen);
+  const feedOpen = useUi((s) => s.explainOpen && s.rightTab === "feed");
   const setUi = useUi((s) => s.set);
   return (
     <div className="dock">
@@ -104,12 +103,12 @@ export default function TimeControls() {
           <div><span style={{ color: "var(--eclipse)" }}>■</span> eclipse</div>
           <div><span style={{ color: "var(--ok)" }}>■</span> contact</div>
         </div>
-        <button className={`btn sm${eventsOpen ? " primary" : ""}`} data-testid="toggle-events" data-tutorial="events"
-          onClick={() => setUi({ eventsOpen: !eventsOpen })}>
-          Events
+        <button className={`btn sm${feedOpen ? " primary" : ""}`} data-testid="toggle-events" data-tutorial="events"
+          title="Open the mission feed: every event in plain language"
+          onClick={() => setUi(feedOpen ? { rightTab: "now" } : { explainOpen: true, rightTab: "feed" })}>
+          Mission feed
         </button>
       </div>
-      {eventsOpen && <EventTimeline />}
     </div>
   );
 }

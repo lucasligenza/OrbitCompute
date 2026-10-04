@@ -27,6 +27,7 @@ uniform vec3 uSun;
 uniform float uGrid;
 uniform float uShadowMode;
 uniform float uLightsOn;
+uniform float uDetail;
 varying vec3 vNormalW;
 varying vec2 vUv;
 varying vec3 vPosW;
@@ -52,7 +53,7 @@ void main() {
   vec3 shallow = vec3(0.05, 0.17, 0.26);
   vec3 ocean = mix(deep, shallow, smoothstep(0.05, 0.75, shelf) * (1.0 - land));
   // Land: subtle large-scale variation, polar ice
-  float var = vnoise(vUv * vec2(90.0, 45.0)) * 0.5 + vnoise(vUv * vec2(260.0, 130.0)) * 0.5;
+  float var = uDetail > 0.5 ? vnoise(vUv * vec2(90.0, 45.0)) * 0.5 + vnoise(vUv * vec2(260.0, 130.0)) * 0.5 : 0.5;
   vec3 landCol = mix(vec3(0.19, 0.23, 0.20), vec3(0.27, 0.28, 0.24), var);
   float ice = smoothstep(60.0, 70.0, abs(lat)) + step(lat, -62.0);
   landCol = mix(landCol, vec3(0.70, 0.76, 0.83), clamp(ice, 0.0, 1.0));
@@ -171,7 +172,7 @@ export function useEarthMaterials() {
     const earth = new THREE.ShaderMaterial({
       vertexShader: vert,
       fragmentShader: frag,
-      uniforms: { uLand: { value: landTexture() }, uLights: { value: cityLightsTexture() }, uLightsOn: { value: 1 }, ...shared },
+      uniforms: { uLand: { value: landTexture() }, uLights: { value: cityLightsTexture() }, uLightsOn: { value: 1 }, uDetail: { value: 1 }, ...shared },
     });
     const clouds = new THREE.ShaderMaterial({
       vertexShader: cloudVert,
@@ -193,10 +194,10 @@ export function useEarthMaterials() {
   }, []);
 }
 
-export function EarthMesh({ material }: { material: THREE.ShaderMaterial }) {
+export function EarthMesh({ material, low }: { material: THREE.ShaderMaterial; low?: boolean }) {
   return (
     <mesh material={material} name="earth">
-      <sphereGeometry args={[EARTH_R, 192, 112]} />
+      <sphereGeometry args={low ? [EARTH_R, 96, 64] : [EARTH_R, 192, 112]} />
     </mesh>
   );
 }

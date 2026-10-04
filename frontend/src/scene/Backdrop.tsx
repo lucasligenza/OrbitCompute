@@ -9,11 +9,11 @@ import { glowTexture, sunDirAt } from "./shared";
 const v = new THREE.Vector3();
 
 /** Seeded starfield with per-star magnitude and colour temperature, plus a faint galactic band. */
-export function Stars() {
+export function Stars({ count = 4200 }: { count?: number }) {
   const { geom, mat } = useMemo(() => {
     let seed = 7;
     const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
-    const n = 4200;
+    const n = count;
     const pos = new Float32Array(n * 3);
     const col = new Float32Array(n * 3);
     const size = new Float32Array(n);
@@ -63,7 +63,7 @@ export function Stars() {
       vertexColors: true,
     });
     return { geom: g, mat: m };
-  }, []);
+  }, [count]);
   return <points geometry={geom} material={mat} frustumCulled={false} renderOrder={-10} />;
 }
 

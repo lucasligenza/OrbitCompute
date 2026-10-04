@@ -13,8 +13,17 @@ export const MODES: { key: Mode; label: string; hint: string }[] = [
 
 export type Overlay = null | "design" | "compare";
 export type Quality = "high" | "low";
+export type Detail = "simple" | "advanced";
 
 const QKEY = "orbitcompute.quality";
+const DKEY = "orbitcompute.detail";
+function initialDetail(): Detail {
+  try {
+    return localStorage.getItem(DKEY) === "advanced" ? "advanced" : "simple";
+  } catch {
+    return "simple";
+  }
+}
 function initialQuality(): Quality {
   try {
     const v = localStorage.getItem(QKEY);
@@ -38,6 +47,9 @@ interface UiState {
   showGroundTracks: boolean;
   preview: { nodeIndex: number; data: OrbitPreview } | null;
   quality: Quality;
+  detail: Detail;
+  rightTab: "now" | "feed";
+  setDetail: (d: Detail) => void;
   showClouds: boolean;
   follow: boolean;
   /** incremented to request a camera reset / fly-to */
@@ -62,6 +74,12 @@ export const useUi = create<UiState>((set) => ({
   showGroundTracks: true,
   preview: null,
   quality: typeof window === "undefined" ? "high" : initialQuality(),
+  detail: typeof window === "undefined" ? "simple" : initialDetail(),
+  rightTab: "now",
+  setDetail: (detail) => {
+    try { localStorage.setItem(DKEY, detail); } catch { /* ignore */ }
+    set({ detail });
+  },
   showClouds: true,
   follow: false,
   cameraNonce: 0,

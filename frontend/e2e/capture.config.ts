@@ -4,6 +4,6 @@ import { defineConfig } from "@playwright/test";
 export default defineConfig({
   ...base,
   testDir: ".",
-  testMatch: /screenshots\.capture\.ts/,
+  testMatch: /\.capture\.ts$/,
   use: { ...base.use, launchOptions: { args: ["--use-angle=d3d11", "--enable-gpu", "--ignore-gpu-blocklist"] } },
 });

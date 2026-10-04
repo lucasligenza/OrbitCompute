@@ -29,6 +29,8 @@ cd frontend && npm run e2e                     # Playwright on installed Edge (s
 | Comms | visible ⇔ elevation ≥ mask; zenith pass detected | — |
 | Timeline | sampleAt(t) after scrubbing backward equals fresh sampleAt(t) (vitest + Playwright) | exact |
 | UI | 3D scene renders frames; no console errors on load | exact |
+| UI | detail/explain panels, scene controls and legend never overlap at 1440, 1180, 1024 px; top bar never overflows | exact |
+| UI | mission feed is sorted, starts/ends with mission items, link changes derived from recorded link state | exact |
 
 ## Honesty rules (review checklist)
 - No preset is described as a real spacecraft or real product.

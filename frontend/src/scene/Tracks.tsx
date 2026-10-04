@@ -127,7 +127,7 @@ export function NadirFootprint({ res }: { res: PreparedResult }) {
       </lineSegments>
       <group ref={cap}>
         <mesh geometry={capGeom} renderOrder={1}>
-          <meshBasicMaterial color={C.accent} transparent opacity={0.08} depthWrite={false} blending={THREE.AdditiveBlending} />
+          <meshBasicMaterial color={C.accent} transparent opacity={0.045} depthWrite={false} blending={THREE.AdditiveBlending} />
         </mesh>
         <lineLoop geometry={ringGeom}>
           <lineBasicMaterial color={C.accent} transparent opacity={0.55} depthWrite={false} />

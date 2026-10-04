@@ -4,6 +4,9 @@ import { useSimTime } from "@/state/time";
 import { MODES, useUi } from "@/state/ui";
 import { fmtUtc } from "@/sim/format";
 import { Badge } from "./Badge";
+import { Icon, type IconName } from "./viz/Icon";
+
+const MODE_ICON: Record<string, IconName> = { orbit: "orbit", power: "bolt", thermal: "thermo", compute: "chip", network: "antenna", system: "layers" };
 
 function Clock() {
   const t = useSimTime(5);
@@ -59,7 +62,8 @@ export default function TopBar() {
             data-testid={`mode-${m.key}`}
             onClick={() => setMode(m.key)}
           >
-            {m.label}
+            <Icon name={MODE_ICON[m.key]} size={12} />
+            <span className="tab-l">{m.label}</span>
           </button>
         ))}
       </nav>

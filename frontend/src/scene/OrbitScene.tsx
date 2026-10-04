@@ -40,6 +40,7 @@ function EarthSystem({ res, mode }: { res: PreparedResult; mode: Mode }) {
     if (group.current) group.current.rotation.y = lerpAngle(res.gmst, c);
     sunDirAt(res, t, mats.uniforms.uSun.value);
     mats.uniforms.uGrid.value = showGrid ? 1 : 0;
+    (mats.earth.uniforms.uDetail as { value: number }).value = quality === "high" ? 1 : 0;
     mats.uniforms.uShadowMode.value = mode === "power" || mode === "system" ? 1 : 0;
     mats.clouds.uniforms.uDrift.value = t * 2.5e-5; // deterministic drift tied to sim time
     // illustrative city lights only read well from a distance; fade them out in close-ups
@@ -49,7 +50,7 @@ function EarthSystem({ res, mode }: { res: PreparedResult; mode: Mode }) {
   return (
     <>
       <group ref={group} name="earth-fixed">
-        <EarthMesh material={mats.earth} />
+        <EarthMesh material={mats.earth} low={quality !== "high"} />
         {showClouds && quality === "high" && <Clouds material={mats.clouds} />}
         <GroundTracks res={res} />
         <Stations res={res} mode={mode} />
@@ -138,8 +139,8 @@ export default function OrbitScene() {
         onCreated={({ gl }) => { gl.setClearColor("#04060a"); setReady(true); }}
       >
         <Clock />
-        <MilkyWay />
-        <Stars />
+        {quality === "high" && <MilkyWay />}
+        <Stars count={quality === "high" ? 4200 : 1200} />
         <SceneContent />
         <OrbitControls makeDefault enableDamping dampingFactor={0.08} minDistance={8.5} maxDistance={160} rotateSpeed={0.5} />
         <CameraRig />

@@ -1,5 +1,6 @@
 "use client";
 import { useUi, MODES } from "@/state/ui";
+import DetailToggle from "./DetailToggle";
 import OrbitPanel from "@/panels/OrbitPanel";
 import PowerPanel from "@/panels/PowerPanel";
 import ThermalPanel from "@/panels/ThermalPanel";
@@ -23,8 +24,8 @@ export default function DetailPanel() {
     <section className="panel detail" data-testid="detail-panel" data-mode={mode} data-tutorial="detail" aria-label={`${m.label} detail`}>
       <div className="panel-h">
         <h3>{m.label}</h3>
-        <span className="faint" style={{ fontSize: 11 }}>{m.hint}</span>
         <span className="spacer" />
+        <DetailToggle />
         <button className="btn sm ghost" aria-label="Collapse" onClick={() => setUi({ detailOpen: false })}>◂</button>
       </div>
       <div className="panel-b">

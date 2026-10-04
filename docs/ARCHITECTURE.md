@@ -77,6 +77,21 @@ After the loop, `events.py` extracts timeline events from the recorded series.
 - **UI state**: mode, selected node/job, open panels, editor drafts (`uiStore`, `scenarioStore`).
   Panels subscribe to time through `useSimTime(hz)` which throttles to ~10 Hz.
 
+## Scene modules (`frontend/src/scene/`)
+| Module | Role |
+|---|---|
+| `OrbitScene.tsx` | Canvas, composition, clock, probe |
+| `Earth.tsx`, `landTexture.ts`, `cityLights.ts` | stylized Earth shader, clouds, atmosphere (sRGB-authored → linear) |
+| `Backdrop.tsx` | starfield, galactic band, Sun + glare |
+| `SpacecraftModel.tsx` | procedural spacecraft, on-model encodings, gauge rings |
+| `Tracks.tsx` | time-faded fat orbit trails / ground tracks, nadir + footprint |
+| `Network3D.tsx` | stations, visibility cones, GEO relays, link beams + packets |
+| `EclipseVolume.tsx` | conical umbra/penumbra display aid |
+| `CameraRig.tsx`, `Effects.tsx` | follow/reset/intro camera; bloom/SMAA/vignette (High quality) |
+
+Graphics quality (High/Low) and panel detail (Simple/Advanced) are per-viewer preferences in
+`uiStore`, persisted in localStorage.
+
 ## Labels
 Screen-space labels are plain DOM nodes in `scene/LabelLayer.tsx`. 3D components write world
 positions into a registry each frame and `LabelProjector` (inside the Canvas) projects them and

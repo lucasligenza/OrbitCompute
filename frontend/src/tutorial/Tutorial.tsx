@@ -55,7 +55,13 @@ const STEPS: Step[] = [
   },
   {
     target: "explain", title: "What is happening?",
-    body: ["This panel explains the selected node at the current instant — generated deterministically from the simulation state, with the reason behind it."],
+    body: ["The Now tab explains the selected node at the current instant — generated deterministically from the simulation state, with the reason behind it. Switch between Simple and Advanced for more detail."],
+    before: () => useUi.getState().set({ rightTab: "now" }),
+  },
+  {
+    target: "feed", title: "Mission feed",
+    body: ["The Mission feed lists everything that happens — eclipses, power shortages, overheating, link changes, finished jobs — in plain language, across all spacecraft. Click any entry to jump there; 'Coming up' shows what is next."],
+    before: () => useUi.getState().set({ rightTab: "feed" }),
   },
   {
     target: "design", title: "7 · Scheduler and design",

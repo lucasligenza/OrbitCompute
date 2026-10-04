@@ -49,3 +49,28 @@ export function footprintHalfAngle(altKm: number, minElDeg: number) {
   const el = (minElDeg * Math.PI) / 180;
   return Math.acos((EARTH_RADIUS_KM * Math.cos(el)) / (EARTH_RADIUS_KM + altKm)) - el;
 }
+
+/**
+ * Topocentric look angles of a spacecraft from a ground station (display only; mirrors
+ * backend/orbitcompute/ground.py). r_eci in km, gmst in rad, station ECEF in km (WGS84) and its
+ * geodetic latitude/longitude in degrees. Returns azimuth (deg, from north, clockwise),
+ * elevation (deg) and slant range (km).
+ */
+export function lookAngles(
+  rEci: [number, number, number], gmst: number, stEcef: [number, number, number], latDeg: number, lonDeg: number,
+): { az: number; el: number; range: number } {
+  const c = Math.cos(gmst), s = Math.sin(gmst);
+  const x = c * rEci[0] + s * rEci[1];
+  const y = -s * rEci[0] + c * rEci[1];
+  const z = rEci[2];
+  const rx = x - stEcef[0], ry = y - stEcef[1], rz = z - stEcef[2];
+  const la = (latDeg * Math.PI) / 180, lo = (lonDeg * Math.PI) / 180;
+  const sl = Math.sin(la), cl = Math.cos(la), so = Math.sin(lo), co = Math.cos(lo);
+  const e = -so * rx + co * ry;
+  const n = -sl * co * rx - sl * so * ry + cl * rz;
+  const u = cl * co * rx + cl * so * ry + sl * rz;
+  const range = Math.hypot(rx, ry, rz);
+  let az = (Math.atan2(e, n) * 180) / Math.PI;
+  if (az < 0) az += 360;
+  return { az, el: (Math.asin(u / range) * 180) / Math.PI, range };
+}

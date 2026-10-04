@@ -17,6 +17,8 @@ replayed from a deterministic physics-based engine.
 | Thermal (megawatt training platform throttling) | Network (6-node constellation, ISL + GEO relay) |
 |---|---|
 | ![Thermal mode](docs/images/thermal-mode.png) | ![Network mode](docs/images/network-constellation.png) |
+| **Compute** (racks, jobs) | **Follow-cam close-up** |
+| ![Compute mode](docs/images/compute-mode.png) | ![Follow close-up](docs/images/follow-closeup.png) |
 
 ## Quick start
 ```bash
@@ -29,13 +31,21 @@ cd frontend && npm install && npm run dev
 
 ## What you can do
 - **Watch a living system**: play at 1×–1000×, scrub anywhere (scrubbing backward restores the exact
-  state), click timeline events to jump to them.
+  state), click any feed entry to jump to it.
 - **Six visualization modes** on one 3D scene — Orbit, Power, Thermal, Compute, Network, System —
-  each with a detail panel: animated power-flow diagram, thermal schematic and margins, accelerator
-  rack with job inspector, ground-contact Gantt and data backlogs, mission summary and self-checks.
-- **"What is happening?"** — a deterministic explanation of the selected node at every instant,
-  including *why* (e.g. "In Earth's shadow the battery alone cannot cover the requested compute load,
-  so compute is shed to protect the reserve").
+  each with a detail panel in **Simple** (one hero visual, key gauges, a one-line insight) or
+  **Advanced** view (every chart, table and model note): Sankey power flow, isometric thermal
+  schematic, accelerator racks with a job lifecycle inspector, link path + polar sky plot + contact
+  windows, live ground-track map, and a node health matrix.
+- **Cinematic scene** (High quality): bloom, procedural spacecraft with sun-tracking wings and
+  false-colour radiators, time-faded orbit trails, visibility cones, link beams with data packets,
+  Earth-shadow volume, follow-cam (double-click a spacecraft). Low quality for modest GPUs.
+- **Now** — a deterministic explanation of the selected node at every instant, including *why*
+  (e.g. "In Earth's shadow the battery alone cannot cover the requested compute load, so compute is
+  shed to protect the reserve").
+- **Mission feed** — one chronological, plain-language feed of everything that happens across all
+  spacecraft (eclipses, power shortages, overheating, link changes, summarised job completions,
+  deadline misses), each with what it means, a "Coming up" preview, and click-to-jump.
 - **Design** orbit (presets, altitude, inclination, RAAN, eccentricity, sun-synchronous LTAN, live
   preview), hardware (compute, arrays, battery, radiator, comms), workloads (seeded generator or
   JSON import), ground stations, scheduler; up to 12 nodes.

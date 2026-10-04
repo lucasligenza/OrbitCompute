@@ -71,10 +71,10 @@ test("power flow responds to eclipse", async ({ page }) => {
   await open(page);
   await page.getByTestId("mode-power").click();
   const pf = page.getByTestId("power-flow");
-  await expect(pf).toContainText("SOLAR ARRAY");
+  await expect(pf).toContainText("SOLAR");
   // t = 0 is in eclipse for the default preset; scrub into sunlight
-  await expect(pf).toContainText("ECLIPSE");
-  await expect(pf).toContainText("DISCHARGING");
+  await expect(pf).toContainText("eclipse");
+  await expect(pf).toContainText("DIS");
   await scrubTo(page, 0.45);
   await expect(page.getByTestId("explain-power")).not.toContainText("On battery");
 });
@@ -84,6 +84,7 @@ test("thermal view shows schematic and model boundary", async ({ page }) => {
   await page.getByTestId("mode-thermal").click();
   await expect(page.getByTestId("schematic")).toBeVisible();
   await expect(page.getByTestId("thermal-panel")).toContainText("Simplified 2-node thermal model");
+  await page.getByTestId("detail-advanced").click();
   await expect(page.getByTestId("thermal-panel")).toContainText("not a spacecraft thermal analysis");
 });
 
@@ -102,17 +103,48 @@ test("compute view: rack and job inspector", async ({ page }) => {
 test("network view: contact windows", async ({ page }) => {
   await open(page);
   await page.getByTestId("mode-network").click();
-  await expect(page.getByTestId("contact-gantt")).toContainText("Svalbard");
+  await expect(page.getByTestId("link-path")).toBeVisible();
   await expect(page.getByTestId("network-panel")).toContainText("Active link");
+  await page.getByTestId("detail-advanced").click();
+  await expect(page.getByTestId("contact-gantt")).toContainText("Svalbard");
+  await expect(page.getByTestId("sky-plot")).toBeVisible();
 });
 
-test("event timeline click seeks time", async ({ page }) => {
+test("mission feed: plain-language events, click seeks time", async ({ page }) => {
   await open(page);
   await page.getByTestId("toggle-events").click();
+  await expect(page.getByTestId("mission-feed")).toBeVisible();
+  await expect(page.getByTestId("mission-feed")).toContainText("Simulation starts");
+  await expect(page.getByTestId("coming-up")).toBeVisible();
   const row = page.getByTestId("event-row").nth(3);
-  const label = (await row.innerText()).split("\n")[0].trim(); // "T+mm:ss"
+  const label = (await row.locator(".feed-time").innerText()).trim(); // "T+mm:ss"
   await row.click();
   await expect(page.getByTestId("met")).toHaveText(label);
+  await page.getByTestId("feed-all").click();
+  expect(await page.getByTestId("event-row").count()).toBeGreaterThan(20);
+});
+
+test("layout: panels, controls and legend never overlap", async ({ page }) => {
+  for (const [w, h] of [[1440, 900], [1180, 800], [1024, 768]]) {
+    await page.setViewportSize({ width: w, height: h });
+    await open(page);
+    const boxes = await page.evaluate(() => {
+      const ids = ["detail-panel", "explain-panel", "scene-controls", "legend"];
+      return ids.map((id) => {
+        const el = document.querySelector(`[data-testid="${id}"]`) as HTMLElement | null;
+        if (!el || getComputedStyle(el).display === "none") return null;
+        const r = el.getBoundingClientRect();
+        return r.width && r.height ? { id, l: r.left, r: r.right, t: r.top, b: r.bottom } : null;
+      }).filter(Boolean) as { id: string; l: number; r: number; t: number; b: number }[];
+    });
+    for (let i = 0; i < boxes.length; i++) for (let j = i + 1; j < boxes.length; j++) {
+      const a = boxes[i], b = boxes[j];
+      const overlap = a.l < b.r - 1 && b.l < a.r - 1 && a.t < b.b - 1 && b.t < a.b - 1;
+      expect(overlap, `${a.id} overlaps ${b.id} at ${w}x${h}`).toBe(false);
+    }
+    const tb = await page.evaluate(() => { const t = document.querySelector(".topbar")!; return t.scrollWidth - t.clientWidth; });
+    expect(tb, `topbar overflows at ${w}px`).toBeLessThanOrEqual(1);
+  }
 });
 
 test("constellation preset and node selection", async ({ page }) => {
@@ -147,4 +179,32 @@ test("comparison runs two schedulers", async ({ page }) => {
   await expect(table).toContainText("Completed workloads", { timeout: 60_000 });
   await expect(table).toContainText("Min thermal margin");
   await expect(page.getByTestId("compare-view")).toContainText("Energy-aware");
+});
+
+test("simple/advanced toggle switches detail level and persists", async ({ page }) => {
+  await open(page);
+  await page.getByTestId("mode-power").click();
+  await expect(page.getByTestId("soc-gauge")).toBeVisible();
+  await expect(page.getByTestId("power-chart")).toHaveCount(0);
+  await expect(page.getByTestId("big-numbers")).toBeVisible();
+  await page.getByTestId("advanced-hint").click();
+  await expect(page.getByTestId("power-chart")).toBeVisible();
+  await expect(page.getByTestId("explain-power")).toContainText("Solar generation");
+  await page.reload();
+  await expect(page.getByTestId("scene")).toHaveAttribute("data-ready", "1");
+  await page.getByTestId("mode-power").click();
+  await expect(page.getByTestId("power-chart")).toBeVisible();
+  await page.getByTestId("detail-simple").click();
+  await expect(page.getByTestId("power-chart")).toHaveCount(0);
+});
+
+test("high quality graphics render frames", async ({ page }) => {
+  await open(page);
+  await page.getByTestId("quality-high").click();
+  await expect(page.getByTestId("scene")).toHaveAttribute("data-quality", "high");
+  await expect(page.getByTestId("scene")).toHaveAttribute("data-ready", "1");
+  const f0 = await frames(page);
+  await page.waitForTimeout(2500);
+  expect(await frames(page)).toBeGreaterThan(f0);
+  await page.getByTestId("quality-low").click();
 });
