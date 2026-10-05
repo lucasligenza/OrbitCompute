@@ -68,8 +68,8 @@ export function Stations({ res, mode }: { res: PreparedResult; mode: Mode }) {
                 <meshStandardMaterial color="#5b6573" metalness={0.5} roughness={0.5} />
               </mesh>
               <mesh position={[0, 0.06, 0]}>
-                <sphereGeometry args={[active ? 0.045 : 0.03, 12, 8]} />
-                <meshBasicMaterial color={active ? new THREE.Color(C.ok).multiplyScalar(1.25) : new THREE.Color("#9fb3c8")} toneMapped={!active} />
+                <sphereGeometry args={[active ? 0.034 : 0.026, 12, 8]} />
+                <meshBasicMaterial color={active ? new THREE.Color(C.ok) : new THREE.Color("#9fb3c8")} toneMapped={!active} />
               </mesh>
               {mode === "network" && (
                 <mesh geometry={g.cone} material={active ? activeMat : coneMat} renderOrder={1} />

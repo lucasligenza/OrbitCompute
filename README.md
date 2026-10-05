@@ -47,9 +47,10 @@ cd frontend && npm install && npm run dev
 - **Now** — a deterministic explanation of the selected node at every instant, including *why*
   (e.g. "In Earth's shadow the battery alone cannot cover the requested compute load, so compute is
   shed to protect the reserve").
-- **People on Earth** — data packets travel from nearby cities to the ground station (or GEO-relay
-  terminal / ISL neighbour) and up to the spacecraft as requests (cyan), and back down as results
-  (green). With no link, requests pile up at the station in amber and the label shows how many
+- **People on Earth** — every packet is a visible round trip: a request (cyan) leaves a city with a
+  departure ring, hands off at the ground station (or GEO-relay terminal / ISL neighbour), climbs to
+  the spacecraft, is processed (circles it while turning green) and streaks back to the same city,
+  landing with a ripple. With no link, requests pile up at the station in amber and the label shows how many
   sessions are waiting and when the next contact comes. Packet density follows the simulated
   link use and realtime sessions; city locations and terrestrial backhaul are illustrative.
 - **Guided tours** (optional, ? button) — a 2-minute interface tour, or a 10-chapter deep dive on
