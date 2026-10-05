@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Badge } from "@/components/Badge";
 import TimeChart from "@/components/charts/TimeChart";
 import { api } from "@/sim/api";
@@ -63,8 +63,10 @@ export default function CompareView() {
   const draft = useScenario((s) => s.draft)!;
   const loadScenario = useScenario((s) => s.loadScenario);
   const setUi = useUi((s) => s.set);
-  const [a, setA] = useState<Side>({ source: "current", scheduler: "fifo" });
-  const [b, setB] = useState<Side>({ source: "current", scheduler: "energy" });
+  // A programmatic request (guided tour) pre-selects both sides and runs immediately.
+  const [request] = useState(() => useUi.getState().compareRequest);
+  const [a, setA] = useState<Side>(request?.a ?? { source: "current", scheduler: "fifo" });
+  const [b, setB] = useState<Side>(request?.b ?? { source: "current", scheduler: "energy" });
   const [res, setRes] = useState<{ a: PreparedResult; b: PreparedResult } | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -74,15 +76,23 @@ export default function CompareView() {
     if (side.scheduler) base.sim.scheduler = side.scheduler;
     return base;
   };
-  const runBoth = async () => {
+  const runBoth = async (sideA: Side = a, sideB: Side = b) => {
     setBusy(true); setErr(null);
     try {
-      const [sa, sb] = await Promise.all([resolve(a), resolve(b)]);
+      const [sa, sb] = await Promise.all([resolve(sideA), resolve(sideB)]);
       const [ra, rb] = await Promise.all([api.simulate(sa), api.simulate(sb)]);
       setRes({ a: prepare(ra), b: prepare(rb) });
     } catch (e) { setErr((e as Error).message); }
     setBusy(false);
   };
+  useEffect(() => {
+    if (!request) return;
+    useUi.getState().set({ compareRequest: null });
+    const id = setTimeout(() => void runBoth(request.a, request.b), 0);
+    return () => clearTimeout(id);
+    // run once for the request captured at mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const agg = useMemo(() => (res ? { a: aggregate(res.a), b: aggregate(res.b) } : null), [res]);
   const duration = res ? Math.max(res.a.duration, res.b.duration) : 1;
 
@@ -122,7 +132,7 @@ export default function CompareView() {
       <div style={{ display: "flex", flexWrap: "wrap", gap: 16, alignItems: "center", padding: "10px 18px", borderBottom: "1px solid var(--line)" }}>
         {sideCtl("A", a, setA, "cmp-a")}
         {sideCtl("B", b, setB, "cmp-b")}
-        <button className="btn primary" onClick={runBoth} disabled={busy} data-testid="cmp-run">{busy ? <><span className="spinner" /> Running…</> : "Run comparison"}</button>
+        <button className="btn primary" onClick={() => runBoth()} disabled={busy} data-testid="cmp-run">{busy ? <><span className="spinner" /> Running…</> : "Run comparison"}</button>
         <span className="muted" style={{ fontSize: 11 }}>Quick:</span>
         <button className="btn sm" onClick={() => { setA({ source: "current", scheduler: "fifo" }); setB({ source: "current", scheduler: "energy" }); }}>FIFO vs energy-aware</button>
         <button className="btn sm" onClick={() => { setA({ source: "monolith-128", scheduler: "" }); setB({ source: "distributed-4x32", scheduler: "" }); }}>1 large vs 4 small</button>
@@ -133,7 +143,7 @@ export default function CompareView() {
       {res && agg && (
         <div className="cmp-grid">
           <div>
-            <table className="metrics" data-testid="cmp-table">
+            <table className="metrics" data-testid="cmp-table" data-tutorial="cmp-table">
               <thead><tr><th>Metric</th><th>A</th><th>B</th><th>B − A</th></tr></thead>
               <tbody>
                 {ROWS.map((r) => {

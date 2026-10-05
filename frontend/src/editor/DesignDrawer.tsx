@@ -300,7 +300,7 @@ export default function DesignDrawer() {
   const sel = useUi((s) => s.selectedNode);
   const setUi = useUi((s) => s.set);
   const preview = useUi((s) => s.preview);
-  const [tab, setTab] = useState<Tab>("orbit");
+  const [tab, setTab] = useState<Tab>(() => useUi.getState().designTab);
   const [nodeIdx, setNodeIdx] = useState(sel);
   const [saved, setSaved] = useState<string | null>(null);
   const idx = Math.min(nodeIdx, (draft?.nodes.length ?? 1) - 1);
@@ -323,7 +323,7 @@ export default function DesignDrawer() {
 
   return (
     <div className="overlay">
-      <aside className="drawer" data-testid="design-drawer" aria-label="Design">
+      <aside className="drawer" data-testid="design-drawer" data-tutorial="design-drawer" aria-label="Design">
         <div className="drawer-h">
           <h2>Design</h2>
           <Badge kind={draft.provenance} />

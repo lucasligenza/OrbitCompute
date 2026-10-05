@@ -208,3 +208,23 @@ test("high quality graphics render frames", async ({ page }) => {
   expect(await frames(page)).toBeGreaterThan(f0);
   await page.getByTestId("quality-low").click();
 });
+
+test("guided tours: launcher, deep dive drives the simulation, exit restores scenario", async ({ page }) => {
+  await open(page);
+  await page.getByTestId("open-tutorial").click();
+  await expect(page.getByTestId("tour-launcher")).toBeVisible();
+  // jump straight to the "Getting rid of heat" chapter: it loads the large training platform
+  await page.getByTestId("chapter-5").click();
+  const card = page.getByTestId("tutorial");
+  await expect(card).toContainText("Chapter 6/10");
+  await expect(card).not.toContainText("Setting up this moment", { timeout: 60_000 });
+  await expect(card).toContainText("radiators");
+  await expect(page.getByTestId("preset-select")).toHaveValue("large-training");
+  await expect(page.getByTestId("detail-panel")).toHaveAttribute("data-mode", "thermal");
+  await page.getByTestId("tutorial-next").click();
+  await expect(card).toContainText("Throttling");
+  await page.getByTestId("tour-exit").click();
+  await page.getByTestId("tour-restore").click();
+  await expect(page.getByTestId("tutorial")).toHaveCount(0);
+  await expect(page.getByTestId("preset-select")).toHaveValue("leo-inference", { timeout: 60_000 });
+});

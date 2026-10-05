@@ -79,7 +79,7 @@ export default function TopBar() {
         Compare
       </button>
       <button className="btn ghost" aria-label="Open tutorial" title="Tutorial" data-testid="open-tutorial"
-        onClick={() => setUi({ tutorialStep: 0, overlay: null })}>
+        onClick={() => setUi({ tourMenu: true })}>
         ?
       </button>
     </header>

@@ -52,6 +52,10 @@ cd frontend && npm install && npm run dev
   (green). With no link, requests pile up at the station in amber and the label shows how many
   sessions are waiting and when the next contact comes. Packet density follows the simulated
   link use and realtime sessions; city locations and terrestrial backhaul are illustrative.
+- **Guided tours** (optional, ? button) — a 2-minute interface tour, or a 10-chapter deep dive on
+  how a space data center works (orbit, shadow, power, compute, heat, communications, scheduling,
+  constellations, design) that loads example scenarios, jumps to the key moments and quotes the
+  simulation's real numbers; offers to restore your own scenario at the end.
 - **Mission feed** — one chronological, plain-language feed of everything that happens across all
   spacecraft (eclipses, power shortages, overheating, link changes, summarised job completions,
   deadline misses), each with what it means, a "Coming up" preview, and click-to-jump.

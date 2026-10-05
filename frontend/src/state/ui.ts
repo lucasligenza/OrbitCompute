@@ -12,6 +12,9 @@ export const MODES: { key: Mode; label: string; hint: string }[] = [
 ];
 
 export type Overlay = null | "design" | "compare";
+export type TourId = "quick" | "deep";
+export type CompareSide = { source: string; scheduler: "" | "fifo" | "priority" | "energy" | "thermal" | "deadline" | "network" };
+export type DesignTab = "orbit" | "hardware" | "workload" | "ground" | "simulation";
 export type Quality = "high" | "low";
 export type Detail = "simple" | "advanced";
 
@@ -42,7 +45,13 @@ interface UiState {
   explainOpen: boolean;
   eventsOpen: boolean;
   overlay: Overlay;
-  tutorialStep: number | null;
+  /** active guided tour (null = none) */
+  tour: { id: TourId; step: number } | null;
+  /** tour launcher open */
+  tourMenu: boolean;
+  /** programmatic comparison request, consumed by CompareView */
+  compareRequest: { a: CompareSide; b: CompareSide } | null;
+  designTab: DesignTab;
   showGrid: boolean;
   showGroundTracks: boolean;
   preview: { nodeIndex: number; data: OrbitPreview } | null;
@@ -69,7 +78,10 @@ export const useUi = create<UiState>((set) => ({
   explainOpen: true,
   eventsOpen: false,
   overlay: null,
-  tutorialStep: null,
+  tour: null,
+  tourMenu: false,
+  compareRequest: null,
+  designTab: "orbit",
   showGrid: true,
   showGroundTracks: true,
   preview: null,
